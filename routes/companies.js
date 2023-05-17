@@ -16,6 +16,8 @@ const router = new express.Router();
 
 
 /** POST / { company } =>  { company }
+ * 
+ * creates a new company
  *
  * company should be { handle, name, description, numEmployees, logoUrl }
  *

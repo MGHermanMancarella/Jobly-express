@@ -118,7 +118,7 @@ class Company {
                num_employees AS "numEmployees",
                logo_url      AS "logoUrl"
         FROM companies
-        WHERE handle = $1`,
+        WHERE handle = $1` <> ,
       [handle]
     )
 

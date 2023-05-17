@@ -31,4 +31,36 @@ function sqlForPartialUpdate (dataToUpdate, jsToSql) {
   }
 }
 
+/**  Accepts an object of keys to filter by.
+ *      nameLike (will find case-insensitive, partial matches)
+ *      minEmployees
+ *      maxEmployees
+ *
+ *  Also accepts a list of keys converted to snake_case
+ *
+ *  Returns string of DB column names ready to be passed in a SQL query
+ *
+ * ex:
+ *    ({"minEmployees":"min_employees", "maxEmployees":"max_employees", "nameLike":"name_like"},
+ *    {numEmployees, logoUrl})
+ *
+ * Returns:
+ *    setCol = ""name_like"=$1, "min_employees"=$2, "max_employees"=$3"
+ */
+
+function sqlForFilter (dataToUpdate, jsToSql) {
+  const keys = Object.keys(dataToUpdate)
+  if (keys.length === 0) throw new BadRequestError('No data')
+
+  // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
+  const cols = keys.map(
+    (colName, idx) => `"${jsToSql[colName] || colName}"=$${idx + 1}`
+  )
+
+  return {
+    setCols: cols.join(', '),
+    values: Object.values(dataToUpdate)
+  }
+}
+
 module.exports = { sqlForPartialUpdate }

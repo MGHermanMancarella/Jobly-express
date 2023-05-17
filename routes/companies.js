@@ -11,6 +11,7 @@ const Company = require('../models/company')
 
 const companyNewSchema = require('../schemas/companyNew.json')
 const companyUpdateSchema = require('../schemas/companyUpdate.json')
+const queryAuth = require('../schemas/queryAuth.json')
 
 const router = new express.Router()
 
@@ -38,10 +39,10 @@ router.post('/', ensureLoggedIn, async function (req, res, next) {
   return res.status(201).json({ company })
 })
 
-/** GET /  =>
+/** GET /  => //FIXME:
  *   { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
  *
- * Can filter on provided search filters:
+ * Can filter only on these search filters:
  * - minEmployees
  * - maxEmployees
  * - nameLike (will find case-insensitive, partial matches)
@@ -50,8 +51,29 @@ router.post('/', ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get('/', async function (req, res, next) {
-  const companies = await Company.findAll()
-  return res.json({ companies })
+  if (Object.keys(req.query).length === 0) {
+    const companies = await Company.findAll()
+    return res.json({ companies })
+  }
+
+  // Handle the query string/ convert to integer where appropriate
+  let queryCopy = { ...req.query }
+  queryCopy.minEmployees = parseInt(queryCopy?.minEmployees) || undefined
+  queryCopy.maxEmployees = parseInt(queryCopy?.maxEmployees) || undefined
+
+  // validate query elements with jsonschema
+  const validator = jsonschema.validate(queryCopy, queryAuth, {
+    required: true
+  })
+  if (queryCopy?.minEmployees > queryCopy?.maxEmployees) {
+    throw new BadRequestError('minEmployees cannot be larger than maxEmployees')
+  }
+
+  if (!validator.valid) {
+    const errs = validator.errors.map(e => e.stack)
+    throw new BadRequestError(errs)
+  }
+  return res.json(queryCopy)
 })
 
 /** GET /[handle]  =>  { company }

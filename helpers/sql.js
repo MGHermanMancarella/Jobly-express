@@ -41,26 +41,32 @@ function sqlForPartialUpdate (dataToUpdate, jsToSql) {
  *  Returns string of DB column names ready to be passed in a SQL query
  *
  * ex:
- *    ({"minEmployees":"min_employees", "maxEmployees":"max_employees", "nameLike":"name_like"},
- *    {numEmployees, logoUrl})
+ *    ({"minEmployees":10, "maxEmployees":100, "nameLike":"net"},
+ *    {minEmployees: 'employees <', maxEmployees: 'employees >',
+      nameLike: 'name ILIKE'}
  *
  * Returns:
  *    setCol = ""name_like"=$1, "min_employees"=$2, "max_employees"=$3"
  */
 
-function sqlForFilter (dataToUpdate, jsToSql) {
-  const keys = Object.keys(dataToUpdate)
+function sqlForFilter (filterBy, jsToSql) {
+  const keys = Object.keys(filterBy)
   if (keys.length === 0) throw new BadRequestError('No data')
 
   // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
-  const cols = keys.map(
-    (colName, idx) => `"${jsToSql[colName] || colName}"=$${idx + 1}`
-  )
 
-  return {
-    setCols: cols.join(', '),
-    values: Object.values(dataToUpdate)
-  }
+  const cols = keys.map(
+    (colName) => `(${jsToSql[colName]} ${filterBy[colName]})`
+  )
+    console.log("cols", cols.join(` AND `))
+  // const values = Object.values(filterBy)
+
+  // return {
+  //   setCols: cols.join(' AND '),
+  //   values: Object.values(filterBy)
+  // }
+
+  return cols.join(` AND `)
 }
 
-module.exports = { sqlForPartialUpdate }
+module.exports = {sqlForFilter, sqlForPartialUpdate }

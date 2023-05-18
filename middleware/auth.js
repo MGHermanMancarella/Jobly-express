@@ -29,7 +29,7 @@ function authenticateJWT (req, res, next) {
 }
 /** Middleware: Requires user is user for route. */
 
-function ensureCorrectUser (req, res, next) {
+function ensureCorrectUserOrAdmin (req, res, next) {
   const currentUser = res.locals.user
   const hasUnauthorizedUsername = currentUser?.username !== req.params.username
 
@@ -66,5 +66,5 @@ module.exports = {
   authenticateJWT,
   ensureLoggedIn,
   ensureAdmin,
-  ensureCorrectUser
+  ensureCorrectUserOrAdmin
 }

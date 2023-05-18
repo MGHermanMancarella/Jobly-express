@@ -141,7 +141,7 @@ describe('GET /companies', function () {
     })
   })
 
-  test('ok for registered user', async function () {
+  test('ok for User', async function () {
     const resp = await request(app)
       .get('/companies')
       .set('authorization', `Bearer ${u1Token}`)
@@ -218,7 +218,7 @@ describe('GET /companies/:handle', function () {
     })
   })
 
-  test('works for registered user: company w/o jobs', async function () {
+  test('works for user: company w/o jobs', async function () {
     const resp = await request(app)
       .get(`/companies/c2`)
       .set('authorization', `Bearer ${u1Token}`)
@@ -260,53 +260,6 @@ describe('PATCH /companies/:handle', function () {
     })
   })
 
-  test('unauth for anon', async function () {
-    const resp = await request(app).patch(`/companies/c1`).send({
-      name: 'C1-new'
-    })
-    expect(resp.statusCode).toEqual(401)
-  })
-
-  test('unauth for registered user', async function () {
-    const resp = await request(app)
-      .patch(`/companies/c1`)
-      .set('authorization', `Bearer ${u1Token}`)
-      .send({
-        name: 'C1-new'
-      })
-    expect(resp.statusCode).toEqual(401)
-  })
-
-  test('not found on no such company as user', async function () {
-    const resp = await request(app)
-      .patch(`/companies/nope`)
-      .send({
-        name: 'new nope'
-      })
-      .set('authorization', `Bearer ${u1Token}`)
-    expect(resp.statusCode).toEqual(401)
-  })
-
-  test('bad request on handle change attempt as user', async function () {
-    const resp = await request(app)
-      .patch(`/companies/c1`)
-      .send({
-        handle: 'c1-new'
-      })
-      .set('authorization', `Bearer ${u1Token}`)
-    expect(resp.statusCode).toEqual(401)
-  })
-
-  test('bad request on invalid data as user', async function () {
-    const resp = await request(app)
-      .patch(`/companies/c1`)
-      .send({
-        logoUrl: 'not-a-url'
-      })
-      .set('authorization', `Bearer ${u1Token}`)
-    expect(resp.statusCode).toEqual(401)
-  })
-
   test('not found on no such company as Admin', async function () {
     const resp = await request(app)
       .patch(`/companies/nope`)
@@ -336,6 +289,54 @@ describe('PATCH /companies/:handle', function () {
       .set('authorization', `Bearer ${adminToken}`)
     expect(resp.statusCode).toEqual(400)
   })
+
+  //////////// Unauthorized non-admin tests
+  test('unauth for anon', async function () {
+    const resp = await request(app).patch(`/companies/c1`).send({
+      name: 'C1-new'
+    })
+    expect(resp.statusCode).toEqual(401)
+  })
+
+  test('unauth for User', async function () {
+    const resp = await request(app)
+      .patch(`/companies/c1`)
+      .set('authorization', `Bearer ${u1Token}`)
+      .send({
+        name: 'C1-new'
+      })
+    expect(resp.statusCode).toEqual(401)
+  })
+
+  test('not found on no such company as User', async function () {
+    const resp = await request(app)
+      .patch(`/companies/nope`)
+      .send({
+        name: 'new nope'
+      })
+      .set('authorization', `Bearer ${u1Token}`)
+    expect(resp.statusCode).toEqual(401)
+  })
+
+  test('bad request on handle change attempt as User', async function () {
+    const resp = await request(app)
+      .patch(`/companies/c1`)
+      .send({
+        handle: 'c1-new'
+      })
+      .set('authorization', `Bearer ${u1Token}`)
+    expect(resp.statusCode).toEqual(401)
+  })
+
+  test('bad request on invalid data as User', async function () {
+    const resp = await request(app)
+      .patch(`/companies/c1`)
+      .send({
+        logoUrl: 'not-a-url'
+      })
+      .set('authorization', `Bearer ${u1Token}`)
+    expect(resp.statusCode).toEqual(401)
+  })
 })
 
 /************************************** DELETE /companies/:handle */
@@ -348,15 +349,22 @@ describe('DELETE /companies/:handle', function () {
     expect(resp.body).toEqual({ deleted: 'c1' })
   })
 
-  test('unauth for anon', async function () {
-    const resp = await request(app).delete(`/companies/c1`)
-    expect(resp.statusCode).toEqual(401)
-  })
-
   test('not found for no such company', async function () {
     const resp = await request(app)
       .delete(`/companies/nope`)
       .set('authorization', `Bearer ${adminToken}`)
     expect(resp.statusCode).toEqual(404)
+  })
+
+  test('unauth for non-admin User', async function () {
+    const resp = await request(app)
+      .delete(`/companies/c1`)
+      .set('authorization', `Bearer ${u1Token}`)
+    expect(resp.statusCode).toEqual(401)
+  })
+
+  test('unauth for anon', async function () {
+    const resp = await request(app).delete(`/companies/c1`)
+    expect(resp.statusCode).toEqual(401)
   })
 })

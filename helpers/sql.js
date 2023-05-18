@@ -49,24 +49,23 @@ function sqlForPartialUpdate (dataToUpdate, jsToSql) {
  *    setCol = ""name_like"=$1, "min_employees"=$2, "max_employees"=$3"
  */
 
-function sqlForFilter (filterBy, jsToSql) {
+function sqlWhereClause (filterBy, jsToSql) {
   const keys = Object.keys(filterBy)
-  if (keys.length === 0) throw new BadRequestError('No data')
+  if (keys.length === 0) {
+    return { whereClause: '', filterValues: [] }
+  }
 
-  // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
+  // Add %% to name search query
+  if ('nameLike' in filterBy) {
+    filterBy['nameLike'] = '%' + filterBy['nameLike'] + '%'
+  }
 
-  const cols = keys.map(
-    (colName) => `(${jsToSql[colName]} ${filterBy[colName]})`
-  )
-    console.log("cols", cols.join(` AND `))
-  // const values = Object.values(filterBy)
+  const cols = keys.map((colName, idx) => `${jsToSql[colName]} $${idx + 1}`)
 
-  // return {
-  //   setCols: cols.join(' AND '),
-  //   values: Object.values(filterBy)
-  // }
-
-  return cols.join(` AND `)
+  return {
+    whereClause: 'WHERE ' + cols.join(' AND '),
+    filterValues: Object.values(filterBy)
+  }
 }
 
-module.exports = {sqlForFilter, sqlForPartialUpdate }
+module.exports = { sqlWhereClause, sqlForPartialUpdate }

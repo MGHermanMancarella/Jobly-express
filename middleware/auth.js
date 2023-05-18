@@ -33,6 +33,7 @@ function ensureCorrectUserOrAdmin (req, res, next) {
   const currentUser = res.locals.user
   const hasUnauthorizedUsername = currentUser?.username !== req.params.username
 
+  //TODO: Clean up the if statement (remove 2nd return && explicit T/F for security shiz)
   if (res.locals.user?.isAdmin) {
     return next()
   } else if (!currentUser || hasUnauthorizedUsername) {
@@ -56,7 +57,7 @@ function ensureLoggedIn (req, res, next) {
  *
  * If not, raises Unauthorized.
  */
-
+//TODO: same shiz
 function ensureAdmin (req, res, next) {
   if (res.locals.user?.isAdmin) return next()
   throw new UnauthorizedError()

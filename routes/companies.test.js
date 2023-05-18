@@ -19,7 +19,7 @@ beforeEach(commonBeforeEach)
 afterEach(commonAfterEach)
 afterAll(commonAfterAll)
 
-/************************************** POST /companies */
+/******************************TODO: add anon ******** POST /companies */
 
 describe('POST /companies', function () {
   const newCompany = {
@@ -308,7 +308,7 @@ describe('PATCH /companies/:handle', function () {
     expect(resp.statusCode).toEqual(401)
   })
 
-  test('not found on no such company as User', async function () {
+  test('unauth on no such company as User', async function () {
     const resp = await request(app)
       .patch(`/companies/nope`)
       .send({

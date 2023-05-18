@@ -117,7 +117,7 @@ describe('POST /users', function () {
     expect(resp.statusCode).toEqual(401)
   })
 
-  test('unauth works for users: create admin', async function () {
+  test('unauth for users: create admin', async function () {
     const resp = await request(app)
       .post('/users')
       .send({
@@ -218,6 +218,7 @@ describe('GET /users', function () {
     expect(resp.statusCode).toEqual(401)
   })
 })
+
 /************************************** GET /users/:username */
 
 describe('GET /users/:username', function () {
@@ -400,7 +401,7 @@ describe('PATCH /users/:username', () => {
     expect(resp.statusCode).toEqual(401)
   })
 
-  test('unauth: set new password as user', async function () {
+  test('unauth: set new password for another user', async function () {
     const resp = await request(app)
       .patch(`/users/u2`)
       .send({
@@ -441,7 +442,7 @@ describe('DELETE /users/:username', function () {
   })
 
   /********************* UN_AUTHORIZED - DELETE /users/:username  (AS_USER or ANON)  */
-  test('unauth for users', async function () {
+  test('unauth for different users', async function () {
     const resp = await request(app)
       .delete(`/users/u2`)
       .set('authorization', `Bearer ${u1Token}`)
@@ -453,7 +454,7 @@ describe('DELETE /users/:username', function () {
     expect(resp.statusCode).toEqual(401)
   })
 
-  test('unauth for user - if user search missing', async function () {
+  test('unauth for user - if username does not exist', async function () {
     const resp = await request(app)
       .delete(`/users/nope`)
       .set('authorization', `Bearer ${u1Token}`)

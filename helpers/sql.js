@@ -8,12 +8,18 @@ const { BadRequestError } = require('../expressError')
  *  Returns string of DB column names ready to be passed in a SQL query
  * as well as their corresponding updated values.
  *
- * ex:
- *    ({name, description, numEmployees, logoUrl}, {numEmployees, logoUrl})
+ * Input ex:
+ *    dataToUpdate: {
+ *         name:"newName",
+ *         description:"newDesc",
+ *         numEmployees:newNumber,
+ *         logoUrl:"newURL"
+ *    }
+ *    jsToSql: {numEmployees: "num_employees", logoUrl: "logo_url"})
  *
  * Returns:
- *    setCol = ""name"=$1, "description"=$2, "num_employees"=$3, "logo_url"=$4"
- *    values = {newValue, newValue2, anotherNewValue, alsoNew}
+ *    setCol = '"name"=$1, "description"=$2, "num_employees"=$3, "logo_url"=$4'
+ *    values = ["newName", "newDesc", newNumber, "newURL"]
  */
 
 function sqlForPartialUpdate (dataToUpdate, jsToSql) {
@@ -36,17 +42,21 @@ function sqlForPartialUpdate (dataToUpdate, jsToSql) {
  *      minEmployees
  *      maxEmployees
  *
- *  Also accepts a list of keys converted to snake_case
+ *  Also accepts a list of keys with values of equivalent SQL phrases
  *
- *  Returns string of DB column names ready to be passed in a SQL query
+ *  Returns an object containing a SQL WHERE clause and values to be inserted
+ *  into this clause via a parameterized array
  *
- * ex:
- *    ({"minEmployees":10, "maxEmployees":100, "nameLike":"net"},
- *    {minEmployees: 'employees <', maxEmployees: 'employees >',
-      nameLike: 'name ILIKE'}
+ *  Input ex:
+ *     ({"minEmployees":10, "maxEmployees":100, "nameLike":"net"},
+ *     {minEmployees: 'employees <', maxEmployees: 'employees >',
+ *     nameLike: 'name ILIKE'}
  *
- * Returns:
- *    setCol = ""name_like"=$1, "min_employees"=$2, "max_employees"=$3"
+ *  Returns:
+ *   {
+ *  whereClause: 'WHERE num_employees > $1 AND num_employees < $2 AND name ILIKE $3'
+ *  filterValues: [10, 100, "'%net%'"]
+ *   }
  */
 
 function sqlWhereClause (filterBy, jsToSql) {
@@ -60,10 +70,11 @@ function sqlWhereClause (filterBy, jsToSql) {
     filterBy['nameLike'] = '%' + filterBy['nameLike'] + '%'
   }
 
-  const cols = keys.map((colName, idx) => `${jsToSql[colName]} $${idx + 1}`)
+  // sqlClauses is an array of strings that can proceed WHERE in an SQL query
+  const sqlClauses = keys.map((colName, idx) => `${jsToSql[colName]} $${idx + 1}`)
 
   return {
-    whereClause: 'WHERE ' + cols.join(' AND '),
+    whereClause: 'WHERE ' + sqlClauses.join(' AND '),
     filterValues: Object.values(filterBy)
   }
 }

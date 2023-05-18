@@ -95,6 +95,61 @@ describe("GET /companies", function () {
           ],
     });
   });
+  test("ok for all filters", async function () {
+    const query = "minEmployees=2&maxEmployees=2&nameLike=c"
+    const resp = await request(app).get(`/companies?${query}`);
+    expect(resp.body).toEqual({
+      companies:
+          [
+            {
+              handle: "c2",
+              name: "C2",
+              description: "Desc2",
+              numEmployees: 2,
+              logoUrl: "http://c2.img",
+            }
+          ],
+    });
+  });
+  test("ok for one filters", async function () {
+    const query = "minEmployees=2"
+    const resp = await request(app).get(`/companies?${query}`);
+    expect(resp.body).toEqual({
+      companies:
+          [
+            {
+              handle: "c2",
+              name: "C2",
+              description: "Desc2",
+              numEmployees: 2,
+              logoUrl: "http://c2.img",
+            },
+            {
+              handle: "c3",
+              name: "C3",
+              description: "Desc3",
+              numEmployees: 3,
+              logoUrl: "http://c3.img",
+            }
+          ],
+    });
+  });
+  test("fails for extra queries", async function () {
+    const query = "minEmployees=2&maxEmployees=2&nameLike=c&handle=p"
+    const resp = await request(app).get(`/companies?${query}`);
+    expect(resp.statusCode).toEqual(400);
+  });
+  test("fails for illegitimate query", async function () {
+    const query = "tacos=soft-shell"
+    const resp = await request(app).get(`/companies?${query}`);
+    expect(resp.statusCode).toEqual(400);
+  });
+  test("fails for bad queries", async function () {
+    const query = "minEmployees=lots&maxEmployees=tons"
+    const resp = await request(app).get(`/companies?${query}`);
+    expect(resp.statusCode).toEqual(400);
+  });
+
 });
 
 /************************************** GET /companies/:handle */

@@ -32,11 +32,9 @@ function authenticateJWT (req, res, next) {
 function ensureCorrectUserOrAdmin (req, res, next) {
   const currentUser = res.locals.user
   const hasUnauthorizedUsername = currentUser?.username !== req.params.username
+  const isNotAdmin = res.locals.user?.isAdmin !== true
 
-  //TODO: Clean up the if statement (remove 2nd return && explicit T/F for security shiz)
-  if (res.locals.user?.isAdmin) {
-    return next()
-  } else if (!currentUser || hasUnauthorizedUsername) {
+  if (isNotAdmin && (!currentUser || hasUnauthorizedUsername)) {
     throw new UnauthorizedError()
   }
 
@@ -59,7 +57,7 @@ function ensureLoggedIn (req, res, next) {
  */
 //TODO: same shiz
 function ensureAdmin (req, res, next) {
-  if (res.locals.user?.isAdmin) return next()
+  if (res.locals.user?.isAdmin === true) return next()
   throw new UnauthorizedError()
 }
 

@@ -119,7 +119,13 @@ class Job {
     const idIdx = '$' + (values.length + 1);
 
     const querySql = `
-        UPDATE jobscompanies
+        UPDATE jobs
+        SET ${setCols}
+        WHERE id = ${idIdx}
+        RETURNING
+            id,
+            title,
+            salary,
             equity,
             company_handle AS "companyHandle"`;
     const result = await db.query(querySql, [...values, id]);

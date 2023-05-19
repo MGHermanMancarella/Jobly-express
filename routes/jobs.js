@@ -7,12 +7,12 @@ const express = require('express')
 
 const { BadRequestError } = require('../expressError')
 const { ensureLoggedIn, ensureAdmin } = require('../middleware/auth')
-const Company = require('../models/job')
+const Job = require('../models/job')
 
 const newJobAuth = require('../schemas/newJobAuth.json')
-const updateJob = require('../schemas/updateJob.json')
+const updateJobSchema = require('../schemas/updateJobSchema.json')
 const queryAuth = require('../schemas/queryAuth.json')
-const { findAll } = require('../models/jobs')
+const { findAll } = require('../models/job')
 
 const router = new express.Router()
 
@@ -41,7 +41,7 @@ router.post('/', ensureAdmin, async function (req, res, next) {
 })
 
 /** GET /  =>
- *   { jobs: [ { handle, name, description, numEmployees, logoUrl }, ...] }
+ *   { jobs: [ { id, title, salary, equity, companyHandle}, ...] }
  *
  * Can filter only on these search filters in the query string:
  * - minEmployees
@@ -83,30 +83,30 @@ router.get('/', async function (req, res, next) {
 
 /** GET /[id]  =>  { job }
  *
- *  Company is { handle, name, description, numEmployees, logoUrl, jobs }
- *   where jobs is [{ id, title, salary, equity }, ...]
+ *  Job is  { id, title, salary, equity, company}
+ *   where company is [{ handle, name, description, numEmployees, logoUrl}, ...]
  *
  * Authorization required: none
  */
 
-router.get('/:handle', async function (req, res, next) {
-  const company = await Company.get(req.params.handle)
-  return res.json({ company })
+router.get('/:id', async function (req, res, next) {
+  const job = await Job.get(req.params.id)
+  return res.json({ job })
 })
 
-/** PATCH /[handle] { fld1, fld2, ... } => { company }
+/** PATCH /[id] { fld1, fld2, ... } => { company }
  *
- * Patches company data.
+ * Patches job data.
  *
- * fields can be: { name, description, numEmployees, logo_url }
+ * fields can be: { title, salary, equity }
  *
- * Returns { handle, name, description, numEmployees, logo_url }
+ * Returns { id, title, salary, equity, companyHandle}0
  *
  * Authorization required: login + is_admin
  */
-
-router.patch('/:handle', ensureAdmin, async function (req, res, next) {
-  const validator = jsonschema.validate(req.body, companyUpdateSchema, {
+//FIXME:
+router.patch('/:id', ensureAdmin, async function (req, res, next) {
+  const validator = jsonschema.validate(req.body, updateJobSchema, {
     required: true
   })
   if (!validator.valid) {
@@ -114,18 +114,18 @@ router.patch('/:handle', ensureAdmin, async function (req, res, next) {
     throw new BadRequestError(errs)
   }
 
-  const company = await Company.update(req.params.handle, req.body)
+  const company = await Job.update(req.params.id, req.body)
   return res.json({ company })
 })
 
-/** DELETE /[handle]  =>  { deleted: handle }
+/** DELETE /[id]  =>  { deleted: id }
  *
  * Authorization: Admin
  */
 
-router.delete('/:handle', ensureAdmin, async function (req, res, next) {
-  await Company.remove(req.params.handle)
-  return res.json({ deleted: req.params.handle })
+router.delete('/:id', ensureAdmin, async function (req, res, next) {
+  await Job.remove(req.params.id)
+  return res.json({ deleted: req.params.id })
 })
 
 module.exports = router

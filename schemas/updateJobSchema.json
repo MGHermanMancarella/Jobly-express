@@ -14,11 +14,8 @@
         },
         "equity": {
             "type": "number",
-            "minimum": 1
+            "maximum": 1
         }
     },
-    "additionalProperties": false,
-    "required": [
-        "title"
-    ]
+    "additionalProperties": false
 }

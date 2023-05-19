@@ -19,7 +19,7 @@ beforeEach(commonBeforeEach)
 afterEach(commonAfterEach)
 afterAll(commonAfterAll)
 
-/******************************TODO: add anon ******** POST /companies */
+/************************************* POST /companies */
 
 describe('POST /companies', function () {
   const newCompany = {
@@ -39,14 +39,6 @@ describe('POST /companies', function () {
     expect(resp.body).toEqual({
       company: newCompany
     })
-  })
-
-  test('unauthorized for users', async function () {
-    const resp = await request(app)
-      .post('/companies')
-      .send(newCompany)
-      .set('authorization', `Bearer ${u1Token}`)
-    expect(resp.statusCode).toEqual(401)
   })
 
   test('bad request with missing data', async function () {
@@ -69,6 +61,21 @@ describe('POST /companies', function () {
       })
       .set('authorization', `Bearer ${adminToken}`)
     expect(resp.statusCode).toEqual(400)
+  })
+
+  /********************* UN_AUTHORIZED - DELETE /users/:username  (AS_USER or ANON)  */
+
+  test('unauthorized for users', async function () {
+    const resp = await request(app)
+      .post('/companies')
+      .send(newCompany)
+      .set('authorization', `Bearer ${u1Token}`)
+    expect(resp.statusCode).toEqual(401)
+  })
+
+  test('unauthorized for anon', async function () {
+    const resp = await request(app).post('/companies').send(newCompany)
+    expect(resp.statusCode).toEqual(401)
   })
 })
 

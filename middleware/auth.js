@@ -55,7 +55,6 @@ function ensureLoggedIn (req, res, next) {
  *
  * If not, raises Unauthorized.
  */
-//TODO: same shiz
 function ensureAdmin (req, res, next) {
   if (res.locals.user?.isAdmin === true) return next()
   throw new UnauthorizedError()

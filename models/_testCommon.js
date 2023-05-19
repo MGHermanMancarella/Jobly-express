@@ -18,6 +18,12 @@ async function commonBeforeAll() {
              ('c3', 'C3', 3, 'Desc3', 'http://c3.img')`);
 
   await db.query(`
+      INSERT INTO jobs(title, salary, equity, company_handle)
+      VALUES ('J3', 300000, 0.03, 'c3'),
+             ('J2', 200000, 0.02, 'c2'),
+             ('J3', 300000, 0.03, 'c3')`);
+
+  await db.query(`
       INSERT INTO users(username,
                         password,
                         first_name,

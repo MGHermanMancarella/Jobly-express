@@ -11,7 +11,7 @@ const Job = require('../models/job')
 
 const newJobAuth = require('../schemas/newJobAuth.json')
 const updateJobSchema = require('../schemas/updateJobSchema.json')
-const queryAuth = require('../schemas/queryAuth.json')
+const jobQueryAuth = require('../schemas/jobQueryAuth.json')
 const { findAll } = require('../models/job')
 
 const router = new express.Router()
@@ -52,22 +52,24 @@ router.post('/', ensureAdmin, async function (req, res, next) {
  */
 
 router.get('/', async function (req, res, next) {
-  const jobs = await Job.findAll()
-  return res.json({ jobs })
 
-  /* **************** COMPANY FILTER FUNCTION ***********
- let queryCopy = req.query
+  let queryCopy = req.query
 
-  // Convert to integer where appropriate from Query-String
-  if ('minEmployees' in queryCopy) {
-    queryCopy['minEmployees'] = Number(queryCopy['minEmployees'])
+  // Convert Query-String to appropriate values for validation
+  if ('minSalary' in queryCopy) {
+    queryCopy['minSalary'] = Number(queryCopy['minSalary'])
   }
-  if ('maxEmployees' in queryCopy) {
-    queryCopy['maxEmployees'] = Number(queryCopy['maxEmployees'])
+  if ('hasEquity' in queryCopy) {
+    if(queryCopy['hasEquity'] === "false"){
+      queryCopy['hasEquity'] = false
+    }
+    else if(queryCopy['hasEquity'] === "true"){
+      queryCopy['hasEquity'] = true
+    }
   }
 
   // Validate query elements with jsonschema
-  const validator = jsonschema.validate(queryCopy, queryAuth, {
+  const validator = jsonschema.validate(queryCopy, jobQueryAuth, {
     required: true
   })
 
@@ -76,9 +78,8 @@ router.get('/', async function (req, res, next) {
     throw new BadRequestError(errs)
   }
 
-  const jobs = await Company.findAll(queryCopy)
+  const jobs = await Job.findAll(queryCopy)
   return res.json({ jobs })
-   */
 })
 
 /** GET /[id]  =>  { job }

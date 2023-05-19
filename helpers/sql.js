@@ -60,7 +60,7 @@ function sqlForPartialUpdate (dataToUpdate, jsToSql={}) {
  */
 
 function sqlWhereClause (filterBy, jsToSql) {
-  const keys = Object.keys(filterBy)
+  let keys = Object.keys(filterBy)
   if (keys.length === 0) {
     return { whereClause: '', filterValues: [] }
   }
@@ -68,6 +68,18 @@ function sqlWhereClause (filterBy, jsToSql) {
   // Add %% to name search query
   if ('nameLike' in filterBy) {
     filterBy['nameLike'] = '%' + filterBy['nameLike'] + '%'
+  }
+  if ('title' in filterBy) {
+    filterBy['title'] = '%' + filterBy['title'] + '%'
+  }
+  if('hasEquity' in filterBy){
+    if(filterBy['hasEquity'] === true){
+      filterBy['hasEquity'] = 0;
+    }
+    if(filterBy['hasEquity'] === false){
+      delete filterBy.hasEquity
+      keys = Object.keys(filterBy)
+    }
   }
 
   // sqlClauses is an array of strings that can proceed WHERE in an SQL query

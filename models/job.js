@@ -59,7 +59,13 @@ class Job {
    *
    **/
 
-  static async findAll() {
+  static async findAll(filter={}) {
+
+    const { whereClause, filterValues } = sqlWhereClause(filter, {
+      minSalary: 'salary >=',
+      hasEquity: 'equity >',
+      title: 'title ILIKE'
+    });
 
     const jobsRes = await db.query(
       `
@@ -69,7 +75,9 @@ class Job {
                equity,
                company_handle AS "companyHandle"
         FROM jobs
+        ${whereClause}
         ORDER BY title, company_handle`,
+        [...filterValues]
     );
 
     return jobsRes.rows;

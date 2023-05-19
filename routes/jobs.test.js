@@ -20,29 +20,27 @@ beforeEach(commonBeforeEach)
 afterEach(commonAfterEach)
 afterAll(commonAfterAll)
 
-/************************************** POST /users (AS ADMIN) */
+/************************************** POST /jobs (AS ADMIN) */
 
-describe('POST /users', function () {
+describe('POST /jobs', function () {
   test('works for Admin: create non-admin', async function () {
     const resp = await request(app)
-      .post('/users')
+      .post('/jobs')
       .send({
-        username: 'u-new',
-        firstName: 'First-new',
-        lastName: 'Last-newL',
-        password: 'password-new',
-        email: 'new@email.com',
-        isAdmin: false
+        title: 'Cat Herder',
+        salary: 60000,
+        equity: 0.1,
+        companyHandle: 'c1'
       })
       .set('authorization', `Bearer ${adminToken}`)
     expect(resp.statusCode).toEqual(201)
     expect(resp.body).toEqual({
-      user: {
-        username: 'u-new',
-        firstName: 'First-new',
-        lastName: 'Last-newL',
-        email: 'new@email.com',
-        isAdmin: false
+      job: {
+        id: expect.any(number),
+        title: 'Cat Herder',
+        salary: 60000,
+        equity: '0.1',
+        companyHandle: 'c1'
       },
       token: expect.any(String)
     })

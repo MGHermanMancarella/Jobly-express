@@ -121,22 +121,26 @@ class Company {
 
     const company = companyRes.rows
 
-    // console.log('COMPANY 0>>>>>>>', company[0].handle)
     if (!company) throw new NotFoundError(`No company: ${handle}`)
 
-    const jobs = company.map(c => {
-      console.log(c.id)
-    })
-    // console.log('COMPANY 0>>>>>>>', jobs)
+    const jobs = company.map(
+      ({ id, title, salary, equity, companyHandle }) => ({
+        id,
+        title,
+        salary,
+        equity: parseFloat(equity),
+        companyHandle
+      })
+    )
 
-    // const result = { company[0].handle,
-    //   // company[0].name,
-    //   // company[0].description,
-    //   // company[0].numEmployees,
-    //   // company[0].logoUrl,
-    //   // jobs}
-    // console.log(company)
-    return company
+    return {
+      handle: company[0].handle,
+      name: company[0].name,
+      description: company[0].description,
+      numEmployees: company[0].numEmployees,
+      logoUrl: company[0].logoUrl,
+      jobs: jobs
+    }
   }
 
   /** Update company data with `data`.
